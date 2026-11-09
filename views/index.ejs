@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+<section class="hero">
+  <h1>Sherubtse College Sports Ground Booking</h1>
+  <p>Reserve 90-minute sessions on the college grounds without double-booking.</p>
+  <% if (!user) { %><a class="btn" href="/login">Log in to continue</a><% } else { %><a class="btn" href="/dashboard">Go to dashboard</a><% } %>
+</section>
+<section class="cards">
+  <% grounds.forEach(g => { %>
+    <article class="card"><h2><%= g.name %></h2><p class="muted"><%= g.ground_type %></p></article>
+  <% }) %>
+</section>
+<section class="panel">
+  <h2>How it works</h2>
+  <ol>
+    <li>The sports administrator publishes open time schedules for each ground.</li>
+    <li>Class representatives and resident leaders (CR/RL) request a 90-minute slot.</li>
+    <li>The administrator approves the request, and the slot is confirmed.</li>
+    <li>Students can see which slots are available or booked.</li>
+  </ol>
+</section>
+<section class="panel">
+  <h2>Good to know</h2>
+  <ul>
+    <li>Every booking is exactly 90 minutes.</li>
+    <li>Two bookings can never overlap on the same ground.</li>
+    <li>All times are Bhutan Standard Time (UTC+6).</li>
+    <li>Accounts are created by the sports administrator.</li>
+  </ul>
+</section>
+<%- include('partials/footer') %>

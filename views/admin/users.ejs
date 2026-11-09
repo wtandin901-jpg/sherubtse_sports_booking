@@ -1,0 +1,41 @@
+<%- include('../partials/header') %>
+<h1>Manage users</h1>
+
+<section class="panel">
+  <h2>Create an account</h2>
+  <p class="muted">A one-time temporary password is shown after creation. The user must change it at first login.
+    For many accounts at once, use <code>npm run users:import</code>.</p>
+  <form data-api data-url="/api/users" data-method="POST" class="row">
+    <label>Full name <input name="fullName" required maxlength="120"></label>
+    <label>Email <input type="email" name="email" required maxlength="255"></label>
+    <label>Role <select name="role"><option value="student">Student</option><option value="cr_rl">CR/RL</option></select></label>
+    <button class="btn" type="submit">Create</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>All users</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Active</th><th>Booking access</th><th>Actions</th></tr></thead>
+    <tbody>
+    <% users.forEach(u => { %>
+      <tr><td><%= u.full_name %></td><td><%= u.email %></td><td><%= u.role %></td>
+        <td><%= u.is_active ? 'Yes' : 'No' %></td>
+        <td><%= u.role === 'cr_rl' ? (u.booking_access ? 'Approved' : 'No') : '-' %></td>
+        <td class="actions">
+          <% if (u.id !== user.id) { %>
+            <button class="btn small <%= u.is_active ? 'danger' : '' %>" data-action data-method="PATCH" data-url="/api/users/<%= u.id %>"
+              data-body="<%= JSON.stringify({ isActive: !u.is_active }) %>"
+              data-confirm="<%= u.is_active ? 'Deactivate' : 'Activate' %> <%= u.full_name %>?"><%= u.is_active ? 'Deactivate' : 'Activate' %></button>
+          <% } %>
+          <% if (u.role === 'cr_rl' && u.booking_access) { %>
+            <button class="btn small danger" data-action data-method="PATCH" data-url="/api/users/<%= u.id %>"
+              data-body="<%= JSON.stringify({ bookingAccess: false }) %>" data-confirm="Revoke booking access?">Revoke access</button>
+          <% } %>
+          <button class="btn small" data-action data-no-reload data-url="/api/users/<%= u.id %>/reset-password"
+            data-confirm="Reset password for <%= u.full_name %>?">Reset password</button>
+        </td></tr>
+    <% }) %>
+    </tbody></table></div>
+</section>
+<%- include('../partials/footer') %>

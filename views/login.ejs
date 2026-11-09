@@ -1,0 +1,13 @@
+<%- include('partials/header') %>
+<section class="panel narrow">
+  <h1>Log in</h1>
+  <% if (error) { %><p class="flash error"><%= error %></p><% } %>
+  <form method="post" action="/login">
+    <input type="hidden" name="_csrf" value="<%= locals.csrfToken || '' %>">
+    <label>Email <input type="email" name="email" required maxlength="255" autocomplete="username"></label>
+    <label>Password <input type="password" name="password" required autocomplete="current-password"></label>
+    <button class="btn" type="submit">Log in</button>
+  </form>
+  <p class="muted">Accounts are created by the sports administrator.</p>
+</section>
+<%- include('partials/footer') %>

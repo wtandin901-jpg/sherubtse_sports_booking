@@ -1,0 +1,7 @@
+node_modules/
+.env
+.env.test
+backups/
+*.backup
+users-with-temp-passwords.csv
+coverage/

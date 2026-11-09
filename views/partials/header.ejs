@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="<%= locals.csrfToken || '' %>">
+  <title><%= title %> | Sherubtse Sports Booking</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header class="site-header">
+  <a class="brand" href="/">Sherubtse Sports Booking</a>
+  <nav>
+    <% if (user) { %>
+      <a href="/dashboard">Dashboard</a>
+      <% if (user.role === 'admin') { %><a href="/admin/users">Users</a><% } %>
+      <form action="/logout" method="post" class="inline">
+        <input type="hidden" name="_csrf" value="<%= locals.csrfToken || '' %>">
+        <button type="submit" class="link">Log out (<%= user.full_name %>)</button>
+      </form>
+    <% } else { %>
+      <a href="/login">Log in</a>
+    <% } %>
+  </nav>
+</header>
+<main class="container">
+<div id="flash" class="flash" role="status" hidden></div>

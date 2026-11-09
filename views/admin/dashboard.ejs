@@ -1,0 +1,138 @@
+<%- include('../partials/header') %>
+<h1>Admin dashboard</h1>
+
+<section class="cards">
+  <article class="card"><h2><%= counts.pending_bookings %></h2><p class="muted">Booking requests to approve</p></article>
+  <article class="card"><h2><%= counts.upcoming_bookings %></h2><p class="muted">Upcoming bookings</p></article>
+  <article class="card"><h2><%= counts.pending_requests %></h2><p class="muted">Pending CR/RL requests</p></article>
+  <article class="card"><h2><%= counts.open_schedules %></h2><p class="muted">Open schedules</p></article>
+</section>
+
+<section class="panel">
+  <h2>Booking requests waiting for approval</h2>
+  <% if (!pendingBookings.length) { %><p class="muted">No booking requests are waiting.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Ground</th><th>Start</th><th>End</th><th>Requested by</th><th>Requested at</th><th></th></tr></thead>
+    <tbody>
+    <% pendingBookings.forEach(b => { %>
+      <tr><td><%= b.id %></td><td><%= b.ground_name %></td><td><%= fmt(b.start_time) %></td><td><%= fmt(b.end_time) %></td>
+        <td><%= b.booker_name %></td><td><%= fmt(b.created_at) %></td>
+        <td class="actions">
+          <button class="btn small" data-action data-url="/api/bookings/<%= b.id %>/approve" data-confirm="Approve booking #<%= b.id %>?">Approve</button>
+          <button class="btn small danger" data-action data-prompt="Reason (optional)" data-url="/api/bookings/<%= b.id %>/reject" data-confirm="Reject booking #<%= b.id %>?">Reject</button>
+        </td></tr>
+    <% }) %>
+    </tbody></table></div>
+  <% } %>
+</section>
+
+<section class="panel">
+  <h2>Create a schedule</h2>
+  <p class="muted">Opening hours: <%= openHour > 12 ? openHour - 12 : openHour %>:00 <%= openHour >= 12 ? 'PM' : 'AM' %> &ndash; <%= closeHour > 12 ? closeHour - 12 : closeHour %>:00 <%= closeHour >= 12 ? 'PM' : 'AM' %>. A schedule is split into 90-minute slots.</p>
+  <form data-api data-url="/api/schedules" data-method="POST" class="row">
+    <label>Ground
+      <select name="groundId" required><% grounds.forEach(g => { %><option value="<%= g.id %>"><%= g.name %></option><% }) %></select></label>
+    <label>Start <input type="datetime-local" name="startTime" required></label>
+    <label>End <input type="datetime-local" name="endTime" required></label>
+    <button class="btn" type="submit">Create</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>CR/RL access requests</h2>
+  <% if (!requests.length) { %><p class="muted">No pending requests.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Name</th><th>Email</th><th>Note</th><th>Requested</th><th></th></tr></thead>
+    <tbody>
+    <% requests.forEach(r => { %>
+      <tr><td><%= r.full_name %></td><td><%= r.email %></td><td><%= r.note %></td><td><%= fmt(r.requested_at) %></td>
+        <td class="actions">
+          <button class="btn small" data-action data-url="/api/access-requests/<%= r.id %>/approve">Approve</button>
+          <button class="btn small danger" data-action data-url="/api/access-requests/<%= r.id %>/reject" data-confirm="Reject this request?">Reject</button>
+        </td></tr>
+    <% }) %>
+    </tbody></table></div>
+  <% } %>
+</section>
+
+<section class="panel">
+  <h2>Schedules</h2>
+  <% if (!schedules.length) { %><p class="muted">No upcoming schedules.</p><% } else { %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Ground</th><th>Start</th><th>End</th><th>Status</th><th>Bookings</th><th>Manage</th></tr></thead>
+    <tbody>
+    <% schedules.forEach(s => { %>
+      <tr><td><%= s.ground_name %></td><td><%= fmt(s.start_time) %></td><td><%= fmt(s.end_time) %></td>
+        <td><span class="badge <%= s.status %>"><%= s.status %></span></td>
+        <td><%= s.locked ? 'Has bookings' : 'None' %></td>
+        <td>
+          <% if (s.locked) { %><span class="muted">Cancel bookings to edit or close</span>
+          <% } else { %>
+            <details><summary>Edit / close</summary>
+              <form data-api data-url="/api/schedules/<%= s.id %>" data-method="PATCH" class="row">
+                <label>Ground <select name="groundId"><% grounds.forEach(g => { %>
+                  <option value="<%= g.id %>" <%= g.id === s.ground_id ? 'selected' : '' %>><%= g.name %></option><% }) %></select></label>
+                <label>Start <input type="datetime-local" name="startTime" value="<%= toInputValue(s.start_time) %>" required></label>
+                <label>End <input type="datetime-local" name="endTime" value="<%= toInputValue(s.end_time) %>" required></label>
+                <button class="btn small" type="submit">Save</button>
+              </form>
+              <% if (s.status === 'open') { %>
+                <button class="btn small danger" data-action data-url="/api/schedules/<%= s.id %>/close" data-confirm="Close this schedule?">Close schedule</button>
+              <% } else { %>
+                <button class="btn small" data-action data-url="/api/schedules/<%= s.id %>/reopen">Reopen</button>
+              <% } %>
+              <button class="btn small danger" data-action data-url="/api/schedules/<%= s.id %>/delete"
+                data-confirm="Delete this schedule? It will disappear from the lists. Old booking history is kept.">Delete schedule</button>
+            </details>
+          <% } %>
+        </td></tr>
+    <% }) %>
+    </tbody></table></div>
+  <% } %>
+</section>
+
+<section class="panel">
+  <h2>Record a staff or outsider booking</h2>
+  <form data-api data-url="/api/bookings/external" data-method="POST" class="row">
+    <label>Ground <select name="groundId" required><% grounds.forEach(g => { %><option value="<%= g.id %>"><%= g.name %></option><% }) %></select></label>
+    <label>Start <input type="datetime-local" name="startTime" required></label>
+    <label>Type <select name="sourceType"><option value="staff">Staff</option><option value="outsider">Outsider</option></select></label>
+    <label>Name <input name="bookerName" required maxlength="120"></label>
+    <label>Contact (optional) <input name="bookerContact" maxlength="120"></label>
+    <button class="btn" type="submit">Record (90 min)</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>All bookings</h2>
+  <form method="get" class="row filters">
+    <label>Ground <select name="groundId"><option value="">All</option><% grounds.forEach(g => { %>
+      <option value="<%= g.id %>" <%= String(g.id) === filters.groundId ? 'selected' : '' %>><%= g.name %></option><% }) %></select></label>
+    <label>Status <select name="status"><option value="">All</option>
+      <option value="pending" <%= filters.status === 'pending' ? 'selected' : '' %>>Pending</option>
+      <option value="confirmed" <%= filters.status === 'confirmed' ? 'selected' : '' %>>Confirmed</option>
+      <option value="cancelled" <%= filters.status === 'cancelled' ? 'selected' : '' %>>Cancelled</option>
+      <option value="rejected" <%= filters.status === 'rejected' ? 'selected' : '' %>>Rejected</option></select></label>
+    <label>Source <select name="sourceType"><option value="">All</option>
+      <% ['cr_rl','staff','outsider'].forEach(t => { %><option value="<%= t %>" <%= filters.sourceType === t ? 'selected' : '' %>><%= t %></option><% }) %></select></label>
+    <label>Date <input type="date" name="date" value="<%= filters.date %>"></label>
+    <button class="btn small" type="submit">Filter</button>
+  </form>
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Ground</th><th>Start</th><th>End</th><th>Booked by</th><th>Source</th><th>Contact</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    <% bookings.forEach(b => { %>
+      <tr><td><%= b.id %></td><td><%= b.ground_name %></td><td><%= fmt(b.start_time) %></td><td><%= fmt(b.end_time) %></td>
+        <td><%= b.booker_name %></td><td><%= b.source_type %></td><td><%= b.booker_contact %></td>
+        <td><span class="badge <%= b.status %>"><%= b.status %></span></td>
+        <td class="actions"><% if (b.status === 'pending') { %>
+          <button class="btn small" data-action data-url="/api/bookings/<%= b.id %>/approve" data-confirm="Approve booking #<%= b.id %>?">Approve</button>
+          <button class="btn small danger" data-action data-prompt="Reason (optional)" data-url="/api/bookings/<%= b.id %>/reject" data-confirm="Reject booking #<%= b.id %>?">Reject</button>
+        <% } else if (b.status === 'confirmed') { %>
+          <button class="btn small danger" data-action data-prompt="Reason (optional)" data-url="/api/bookings/<%= b.id %>/cancel" data-confirm="Cancel booking #<%= b.id %>?">Cancel</button>
+        <% } %></td></tr>
+    <% }) %>
+    <% if (!bookings.length) { %><tr><td colspan="9" class="muted">No bookings match.</td></tr><% } %>
+    </tbody></table></div>
+</section>
+<%- include('../partials/footer') %>

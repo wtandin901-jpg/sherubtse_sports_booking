@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sherubtse_sports_booking
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sherubtse_sports_booking"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: sherubtse_sports_booking
+      DB_USER: postgres
+      DB_PASSWORD: ${DB_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+      SESSION_COOKIE_SECURE: "false"
+      TRUST_PROXY: "0"
+      CANCEL_CUTOFF_MINUTES: ${CANCEL_CUTOFF_MINUTES:-0}
+      OPEN_HOUR: ${OPEN_HOUR:-6}
+      CLOSE_HOUR: ${CLOSE_HOUR:-21}
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:

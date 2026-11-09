@@ -1,0 +1,60 @@
+<%- include('../partials/header') %>
+<h1>CR/RL dashboard</h1>
+
+<section class="panel">
+  <h2>Booking access</h2>
+  <% const pending = requests.find(r => r.status === 'pending'); const last = requests[0]; %>
+  <% if (user.booking_access) { %>
+    <p><span class="badge confirmed">Approved</span> You can request open slots below. Each request is <strong>pending</strong> until the administrator approves it.</p>
+  <% } else if (pending) { %>
+    <p><span class="badge open">Pending</span> Your request is waiting for the administrator.</p>
+  <% } else { %>
+    <% if (last && last.status === 'rejected') { %><p class="flash warn">Your last request was rejected<%= last.decision_note ? ': ' + last.decision_note : '' %>.</p><% } %>
+    <form data-api data-url="/api/access-requests" data-method="POST">
+      <label>Note to administrator (optional) <textarea name="note" maxlength="500" rows="2"></textarea></label>
+      <button class="btn" type="submit">Request booking access</button>
+    </form>
+  <% } %>
+</section>
+
+<section class="panel">
+  <h2>Open schedules</h2>
+  <% if (!schedules.length) { %><p class="muted">No open schedules yet.</p><% } %>
+  <% schedules.forEach(s => { %>
+    <article class="schedule">
+      <h3><%= s.ground_name %> &middot; <%= fmt(s.start_time) %> &ndash; <%= fmt(s.end_time) %></h3>
+      <div class="slots">
+        <% s.slots.forEach(slot => { %>
+          <% if (slot.available && user.booking_access) { %>
+            <button class="slot free" data-action data-url="/api/bookings"
+              data-body="<%= JSON.stringify({ scheduleId: s.id, startTime: slot.start }) %>"
+              data-confirm="Request <%= s.ground_name %> on <%= fmt(slot.start) %>? The administrator must approve it."><%= fmt(slot.start) %> <small>Request</small></button>
+          <% } else { %>
+            <span class="slot <%= slot.available ? 'free' : 'taken' %>"><%= fmt(slot.start) %> <small><%= slot.available ? 'Available' : 'Unavailable' %></small></span>
+          <% } %>
+        <% }) %>
+      </div>
+    </article>
+  <% }) %>
+</section>
+
+<section class="panel">
+  <h2>My bookings and requests</h2>
+  <% if (cancelCutoff > 0) { %><p class="muted">Cancel at least <%= cancelCutoff %> minutes before the start.</p>
+  <% } else { %><p class="muted">You can cancel any time before the booking starts.</p><% } %>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Ground</th><th>Start</th><th>End</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    <% bookings.forEach(b => { %>
+      <tr><td><%= b.ground_name %></td><td><%= fmt(b.start_time) %></td><td><%= fmt(b.end_time) %></td>
+        <td><span class="badge <%= b.status %>"><%= b.status %></span></td>
+        <td><% if (['pending','confirmed'].includes(b.status) && new Date(b.start_time) > new Date()) { %>
+          <button class="btn small danger" data-action data-url="/api/bookings/<%= b.id %>/cancel"
+            data-confirm="<%= b.status === 'pending' ? 'Withdraw this request?' : 'Cancel this booking?' %>"><%= b.status === 'pending' ? 'Withdraw' : 'Cancel' %></button>
+        <% } %>
+        <% if (b.status === 'rejected' && b.decision_note) { %><span class="muted">Reason: <%= b.decision_note %></span><% } %></td></tr>
+    <% }) %>
+    <% if (!bookings.length) { %><tr><td colspan="5" class="muted">No bookings yet.</td></tr><% } %>
+    </tbody></table></div>
+</section>
+<%- include('../partials/footer') %>

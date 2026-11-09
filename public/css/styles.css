@@ -1,0 +1,49 @@
+:root { --green:#1f6f4a; --green-dark:#154d34; --red:#b3261e; --amber:#a15c00; --bg:#f4f6f5; --text:#1d2521; --muted:#5f6b65; --line:#d9e0dc; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+.container { max-width:1100px; margin:0 auto; padding:1rem; }
+.site-header { display:flex; flex-wrap:wrap; gap:.5rem 1rem; align-items:center; justify-content:space-between; background:var(--green-dark); color:#fff; padding:1.6rem 2rem; box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+.site-header a, .site-header .link { color:#fff; text-decoration:none; background:none; border:0; font:inherit; cursor:pointer; }
+.site-header nav { display:flex; flex-wrap:wrap; gap:1.5rem; align-items:center; font-size:1.1rem; }
+.brand { font-weight:700; font-size:1.8rem; }
+.inline { display:inline; margin:0; }
+   .site-footer { background:var(--green-dark); color:#fff; text-align:center; margin-top:2rem; padding:1.5rem 1rem; font-size:.95rem; line-height:1.8; }
+h1 { font-size:1.6rem; margin:.5rem 0 1rem; } h2 { font-size:1.2rem; margin-top:0; } h3 { font-size:1rem; margin:.25rem 0 .5rem; }
+.muted { color:var(--muted); font-size:.92rem; }
+.panel { background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem; margin-bottom:1rem; }
+.panel.narrow { max-width:440px; margin:2rem auto; }
+.hero { text-align:center; padding:2rem 0; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-bottom:1rem; }
+.card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:1rem; text-align:center; }
+.card h2 { margin:0 0 .25rem; }
+label { display:block; font-weight:600; font-size:.9rem; margin-bottom:.75rem; }
+input, select, textarea { display:block; width:100%; margin-top:.25rem; padding:.55rem; border:1px solid #b9c4be; border-radius:6px; font:inherit; background:#fff; }
+.row { display:flex; flex-wrap:wrap; gap:.75rem; align-items:flex-end; }
+.row label { flex:1 1 170px; margin-bottom:0; }
+.btn { display:inline-block; background:var(--green); color:#fff; border:0; border-radius:6px; padding:.6rem 1rem; font:inherit; font-weight:600; cursor:pointer; text-decoration:none; }
+.btn:hover { background:var(--green-dark); } .btn:disabled { opacity:.6; cursor:wait; }
+.btn.small { padding:.35rem .7rem; font-size:.85rem; } .btn.danger { background:var(--red); }
+.flash { padding:.7rem 1rem; border-radius:6px; margin-bottom:1rem; }
+.flash.ok { background:#e3f4ea; color:#14532d; } .flash.error { background:#fde7e5; color:#7a1912; } .flash.warn { background:#fff3d6; color:#6b4200; }
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:.92rem; }
+th, td { text-align:left; padding:.55rem .6rem; border-bottom:1px solid var(--line); vertical-align:top; }
+th { background:#eef3f0; white-space:nowrap; }
+.actions { white-space:nowrap; display:flex; gap:.4rem; flex-wrap:wrap; }
+.badge { padding:.1rem .55rem; border-radius:999px; font-size:.8rem; background:#e5e9e7; }
+.badge.confirmed, .badge.open { background:#d8f0e2; color:#14532d; } .badge.cancelled, .badge.closed { background:#fde7e5; color:#7a1912; }
+.schedule { border-top:1px solid var(--line); padding:.75rem 0; }
+.slots { display:flex; flex-wrap:wrap; gap:.5rem; }
+.slot { display:inline-flex; flex-direction:column; padding:.45rem .8rem; border-radius:8px; border:1px solid var(--line); background:#fff; font:inherit; font-size:.9rem; }
+.slot small { color:var(--muted); } .slot.free { border-color:#8fcca8; background:#effaf3; } .slot.taken { background:#f1f1f1; color:#777; }
+button.slot { cursor:pointer; } button.slot:hover { background:#dff5e8; }
+details summary { cursor:pointer; color:var(--green-dark); font-weight:600; }
+code { background:#eef3f0; padding:.1rem .3rem; border-radius:4px; }
+@media (max-width: 900px) { .container { padding:.75rem; } }
+@media (max-width: 600px) {
+  h1 { font-size:1.35rem; } .site-header { flex-direction:column; align-items:flex-start; }
+  .row label { flex:1 1 100%; } .btn { width:100%; text-align:center; } .actions .btn, td .btn.small { width:auto; }
+  .slot { flex:1 1 100%; }
+}
+
+   body::before { content:""; position:fixed; top:0; left:0; width:100%; height:100%; background:url('/images/logo.webp') center center / min(70vw, 480px) no-repeat; opacity:.25; z-index:-1; pointer-events:none; }
